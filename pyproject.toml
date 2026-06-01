@@ -1,0 +1,49 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "smartcomment"
+version = "0.1.1"
+description = "smartcomment: A General-Purpose Execution Graph Tracing Package."
+readme = "README.md"
+keywords = [
+  "debugging",
+  "execution-graph",
+  "system-explanation", 
+  "AI", 
+  "log", 
+]
+requires-python = ">=3.12"
+authors = [
+  { name = "Xinle Deng", email = "dengxinle@zju.edu.cn" }
+]
+license = { text = "MIT" }
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Operating System :: OS Independent", 
+  "Intended Audience :: Developers",
+  "Intended Audience :: Science/Research",
+  "License :: OSI Approved :: MIT License",
+  "Natural Language :: English",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only", 
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Software Development :: Libraries :: Python Modules",
+]
+dependencies = [
+  "pydantic>=2.0",
+  "loguru>=0.7",
+]
+
+[project.urls]
+Homepage = "https://github.com/zjunlp/smartcomment"
+
+[project.optional-dependencies]
+viz = ["graphviz>=0.20", "pyvis>=0.3", "matplotlib>=3.8"]
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+include = ["smartcomment*"]
