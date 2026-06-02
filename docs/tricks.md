@@ -555,7 +555,114 @@ The output is:
 
 ---
 
-## 8. Use the Execution Graph Query Interfaces
+## 8. Use `class_name` to Separate Same-Content Variables
+
+Sometimes two variables have the same content but different roles in the system. For example, consider a prompt template that asks a model to repeat the user's input. In that case, the user input and the model output may be exactly the same string.
+
+If both values use the default content-based identity, `smartcomment` may resolve them to the same variable, because their content is identical. **This is usually not what you want: the user input and the model output are semantically different variables, even if their text is the same**. For this case, you can use `class_name` to namespace the variable identity:
+
+```python
+def repeat_input(prompt_template: str, user_input: str) -> str:
+    return user_input
+
+
+with comment_graph() as graph:
+    prompt_template = "Repeat the user input exactly: {user_input}"
+    user_input = "The user likes graph visualization."
+    model_output = repeat_input(prompt_template, user_input)
+
+    comment_op(
+        op_name="llm_generation",
+        category="llm_generation",
+        comment="An LLM responds to a user's question.",
+        inputs=[
+            (
+                prompt_template,
+                {
+                    "class_name": "prompt_template", 
+                    "category": "prompt_template",
+                    "comment": "The prompt template that asks the model to repeat the input.",
+                }
+            ),
+            (
+                user_input,
+                {
+                    "class_name": "user_input",
+                    "category": "user_input",
+                    "comment": "The original user input.",
+                }
+            ) 
+        ],
+        outputs=[
+            (
+                model_output,
+                {
+                    "class_name": "model_output",
+                    "category": "model_output",
+                    "comment": "The model output.",
+                }
+            )
+        ],
+    )
+
+print(graph.to_runtime_graph().to_markdown())
+```
+
+The output is:
+```text
+## Graph
+
+### Nodes (3)
+
+**str:7c77680ccccb2079b8244166f313788aaad588b6** (v1) [prompt_template]
+- Full Node ID: `prompt_template:str:7c77680ccccb2079b8244166f313788aaad588b6@1`
+- Value: `'Repeat the user input exactly: {user_input}'`
+- Comment: The prompt template that asks the model to repeat the input.
+- Category: prompt_template
+- Created At: created in the system at `2026-06-02 10:47:16.095`
+
+**str:a49c76c7ab6fc8aad410da8adf158826a62ffe1b** (v1) [user_input]
+- Full Node ID: `user_input:str:a49c76c7ab6fc8aad410da8adf158826a62ffe1b@1`
+- Value: `'The user likes graph visualization.'`
+- Comment: The original user input.
+- Category: user_input
+- Created At: created in the system at `2026-06-02 10:47:16.095`
+
+**str:a49c76c7ab6fc8aad410da8adf158826a62ffe1b** (v1) [model_output]
+- Full Node ID: `model_output:str:a49c76c7ab6fc8aad410da8adf158826a62ffe1b@1`
+- Value: `'The user likes graph visualization.'`
+- Comment: The model output.
+- Category: model_output
+- Created At: created in the system at `2026-06-02 10:47:16.095`
+
+### Edges (2)
+
+**Edge: `prompt_template:str:7c77680ccccb2079b8244166f313788aaad588b6@1` -> `model_output:str:a49c76c7ab6fc8aad410da8adf158826a62ffe1b@1`**
+- Edge ID: `edge-854815f33d60465c84b21ae288c5f72f`
+- Category: llm_generation
+- Comment: An LLM responds to a user's question.
+- Created At: created in the system at `2026-06-02 10:47:16.096`
+
+**Edge: `user_input:str:a49c76c7ab6fc8aad410da8adf158826a62ffe1b@1` -> `model_output:str:a49c76c7ab6fc8aad410da8adf158826a62ffe1b@1`**
+- Edge ID: `edge-46069a758e4b4cfbae17b38104836d35`
+- Category: llm_generation
+- Comment: An LLM responds to a user's question.
+- Created At: created in the system at `2026-06-02 10:47:16.096`
+
+### Operations (1)
+
+**Op: llm_generation**
+- Operation ID: `op-404b902eb91045e385a61def4924c777`
+- Category: llm_generation
+- Comment: An LLM responds to a user's question.
+- Created At: created in the system at `2026-06-02 10:47:16.095`
+```
+
+With `class_name`, `smartcomment` prefixes the variable name with the namespace. Even if `user_input` and `model_output` have the same content-based identity, their full node identifiers become different.
+
+---
+
+## 9. Use the Execution Graph Query Interfaces
 
 After a graph is built, it is more than a visualization artifact. You can use its query interfaces to inspect and slice the recorded trace. For example, you can retrieve variables, operations, edges, and sessions; search them by category or name; filter subgraphs by time, category, operation, or session; and run graph traversals such as ancestor or descendant queries. For concrete end-to-end usage, see the [MemTrace](https://github.com/zjunlp/MemTrace) source code.
 
