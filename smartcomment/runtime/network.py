@@ -138,6 +138,8 @@ class ExecNetwork(BaseMetadataModel):
         """
         graph_data = {}
         if isinstance(values, dict):
+            # Copy before popping so the caller's input dictionary is not mutated.
+            values = values.copy()
             graph_data = values.pop("data", {})
 
         instance = handler(values)

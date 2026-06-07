@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "smartcomment"
-version = "0.1.1"
+version = "0.1.2"
 description = "smartcomment: A General-Purpose Execution Graph Tracing Package."
 readme = "README.md"
 keywords = [
